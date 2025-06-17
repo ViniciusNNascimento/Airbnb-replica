@@ -22,7 +22,7 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   connectDb();
 
-  const { name, email, password} = req.body;
+  const { name, email, password } = req.body;
   const encryptedPassword = bcrypt.hashSync(password, bcryptSalt);
 
   try {
@@ -37,6 +37,35 @@ router.post("/", async (req, res) => {
     res.status(500).json(error);
 
   }
+});
+
+router.post("/login", async (req, res) => {
+  connectDb();
+
+  const { email, password } = req.body;
+
+  try {
+    const userDoc = await User.findOne({ email });
+
+    if (userDoc) {
+      const passwordCorrect = bcrypt.compareSync(password, userDoc.password);
+      const { name, _id } = userDoc;
+
+      passwordCorrect ? res.json( { name, email,  _id } ) : res.status(400).json("Senha inválida");
+    } else {
+      res.status(400).json("Usuário não encontrado");
+
+    }
+
+
+    res.json(userDoc[0]);
+  } catch (error) {
+    res.status(500).json(error);
+
+  }
+
+
+
 });
 
 
