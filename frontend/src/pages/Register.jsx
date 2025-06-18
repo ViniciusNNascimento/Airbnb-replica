@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import axios from "axios";
+import { useUserContext } from "../contexts/UserContext";
 
-const Register = ({ setUser }) => {
+const Register = () => {
+  const { setUser } = useUserContext();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -11,21 +13,22 @@ const Register = ({ setUser }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // if (email && password) {
-    //   try {
-    //     const { data: userDoc } = await axios.post("/users/login", {
-    //       email,
-    //       password,
-    //     });
+    if (email && password && name) {
+      try {
+        const { data: userDoc } = await axios.post("/users", {
+          name,
+          email,
+          password,
+        });
 
-    //     setUser(userDoc);
-    //     setRedirect(true);
-    //   } catch (error) {
-    //     alert(`Usuário ou senha inválidos. ${error.response.data}`);
-    //   }
-    // } else {
-    //   alert("Por favor, preencha todos os campos.");
-    // }
+        setUser(userDoc);
+        setRedirect(true);
+      } catch (error) {
+        alert(`Erro ao cadastrar usuario: ${JSON.stringify(error)}}`);
+      }
+    } else {
+      alert("Por favor, preencha todos os campos.");
+    }
   };
 
   if (redirec) return <Navigate to="/" />;
