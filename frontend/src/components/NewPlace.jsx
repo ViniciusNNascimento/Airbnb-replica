@@ -1,28 +1,76 @@
 import React, { useState } from 'react'
 import Perks from './Perks';
+import { Navigate } from 'react-router-dom';
 import axios from "axios";
+import { useUserContext } from '../contexts/UserContext';
+import PhotoUploader from './PhotoUploader';
 
 const NewPlace = () => {
+    const { user } = useUserContext();
     const [title, setTitle] = useState("");
     const [city, setCity] = useState("");
-    const [photos, setPhotos] = useState("");
+    const [photos, setPhotos] = useState([]);
+    const [perks, setPerks] = useState([]);
     const [descripition, setDescripition] = useState("");
     const [extras, setExtras] = useState("");
     const [price, setPrice] = useState("");
     const [checkin, setCheckin] = useState("");
     const [checkout, setCheckout] = useState("");
     const [guests, setGuests] = useState("");
+    const [redirect, setRedirect] = useState(false)
+    const [photoslink, setPhotosLink] = useState("");
 
-    
 
-    const handleSubmit = (e) => {
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // const newPlace = await axios.post('/places', {
+        if (title &&
+            city &&
+            // photos.length > 0 &&
+            descripition &&
+            price &&
+            checkin &&
+            checkout &&
+            guests
+        ) {
+            try {
+                const NewPlace = await axios.post('/places', {
+                    owner: user._id,
+                    title,
+                    city,
+                    // photos,
+                    descripition,
+                    extras,
+                    perks,
+                    price,
+                    checkin,
+                    checkout,
+                    guests,
+                });
 
-        // })
+                console.log(NewPlace)
+
+                setRedirect(true)
+            } catch (error) {
+                console.error(JSON.stringify(error));
+                alert('deu erro ao tentar criar um novo lugar')
+            };
+
+        } else {
+            alert("preencha todas as informações antes de enviar")
+        }
+
+
+
+
 
     };
+
+   
+    if (redirect) return <Navigate to="/account/places" />;
+
+
 
 
     return (
@@ -52,34 +100,7 @@ const NewPlace = () => {
 
             </div>
 
-            <div className='flex flex-col gap-1 '>
-
-                <label htmlFor='photos' className='ml-2 text-2xl font-bold'>Fotos</label>
-                <div className='flex gap-2'>
-                    <input
-                        type="text"
-                        placeholder="Adicione uma foto pelo link dela"
-                        className="rounded-full border border-gray-300 px-4 py-2 grow"
-                        value={photos}
-                        id='photos'
-                        onChange={(e) => setPhotos(e.target.value)} />
-                    <button className='rounded-full cursor-pointer border border-gray-300 px-4 hover:bg-gray-300 transition py-2 bg-gray-100'>Enviar foto</button>
-                </div>
-
-                <div className='grid grid-cols-5 gap-4 mt-2'>
-                    <label htmlFor="file" className='items-center justify-center flex gap-2 cursor-pointer aspect-square border rounded-2xl border-gray-300' > <input className='hidden' type="file" id="file"
-                    />
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15" />
-                        </svg>
-
-                        Upload
-                    </label>
-
-
-
-                </div>
-            </div>
+            <PhotoUploader {...{photoslink, setPhotosLink, setPhotos, photos}} />
 
             <div className='flex flex-col gap-1'>
                 <label htmlFor='descripition' className='ml-2 text-2xl font-bold'>Descrição</label>
@@ -94,7 +115,7 @@ const NewPlace = () => {
             <div className='flex flex-col gap-1'>
                 <label htmlFor='perks' className='ml-2 text-2xl font-bold'>Comodidades</label>
 
-                <Perks />
+                <Perks {...{ perks, setPerks }} />
 
 
             </div>
