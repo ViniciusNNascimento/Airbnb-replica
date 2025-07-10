@@ -1,5 +1,4 @@
 import axios from 'axios';
-import React from 'react'
 
 const PhotoUploader = ({ photoslink, setPhotosLink, setPhotos, photos }) => {
 
@@ -8,16 +7,41 @@ const PhotoUploader = ({ photoslink, setPhotosLink, setPhotos, photos }) => {
 
 
         if (photoslink) {
-            const { data: filename } = await axios.post("/places/upload/link", { link: photoslink, });
+            try {
+                const { data: filename } = await axios.post("/places/upload/link", { link: photoslink, });
 
+                setPhotos((prevValue) => [...prevValue, filename]);
 
-
-            setPhotos((prevValue) => [...prevValue, filename]);
+            } catch (error) {
+                alert('deu erro na hora do upload por link', JSON.stringify(error))
+            }
         } else {
             alert("nao existe nenhum link a ser enviado")
         }
 
-    }
+    };
+
+    const uploadPhoto = async (e) => {
+        const { files } = e.target;
+        const filesArray = [...files]
+
+        const formData = new FormData();
+
+        filesArray.forEach((file) => formData.append("files", file));
+
+        try {
+            const { data: urlArray } = await axios.post("/places/upload", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+
+            setPhotos((prevValue) => [...prevValue, ...urlArray]);
+
+        } catch (error) {
+            alert('deu erro na hora do upload', JSON.stringify(error));
+        }
+
+
+    };
 
     return (
         <div>
@@ -41,16 +65,21 @@ const PhotoUploader = ({ photoslink, setPhotosLink, setPhotos, photos }) => {
                     {photos.map((photo) => (
                         <img
                             className='aspect-square object-cover rounded-2xl'
-                            src={`${axios.defaults.baseURL}/tmp/${photo}`}
+                            src={`${photo}`}
                             alt="imagem do lugar"
                             key={photo} />
 
                     ))}
-                    <label htmlFor="file" className='items-center justify-center flex gap-2 cursor-pointer aspect-square border rounded-2xl border-gray-300' > <input className='hidden' type="file" id="file"
-                    />
+                    <label htmlFor="file" className='items-center justify-center flex gap-2 cursor-pointer aspect-square border rounded-2xl border-gray-300' >
+                        <input
+                            onChange={uploadPhoto} className='hidden'
+                            type="file" id="file"
+                            multiple
+                        />
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15" />
                         </svg>
+
 
                         Upload
                     </label>
