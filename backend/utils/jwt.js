@@ -1,7 +1,7 @@
 import "dotenv/config.js";
 import jwt from "jsonwebtoken";
 
-const { JWT_SECRET_KEY } = process.env;
+const JWT_SECRET_KEY  = "fjanfjanflokçad";
 
 
 

@@ -8,6 +8,94 @@ import { sendToS3, downloadImage, uploadImage } from "./controller.js"
 
 const router = Router();
 
+router.get('/', async (req, res) => {
+    connectDb();
+    try {
+        const placeDocs = await Place.find();
+        res.json(placeDocs)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json("deu erro ao encontrar as acomodações", error);
+    }
+
+});
+
+router.get("/owner", async (req, res) => {
+    connectDb()
+
+
+    try {
+        const userInfo = await JWTVerify(req);
+        try {
+            const placeDocs = await Place.find({ owner: userInfo._id });
+
+            res.json(placeDocs);
+        } catch (error) {
+            console.error(error)
+            res.status(500).json("Deu erro ao encontrar as acomodaçoes");
+        }
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json("Deu erro ao verificar o usuario");
+    }
+});
+
+router.get('/:id', async (req, res) => {
+    connectDb();
+    const { id: _id } = req.params;
+    try {
+        const placeDoc = await Place.findOne({ _id });
+        res.json(placeDoc)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json("deu erro ao encontrar a acomodação", error);
+    }
+
+});
+router.put('/:id', async (req, res) => {
+    connectDb();
+
+
+    const { id: _id } = req.params;
+
+    const {
+        title,
+        city,
+        photos,
+        descripition,
+        extras,
+        perks,
+        price,
+        checkin,
+        checkout,
+        guests,
+    } = req.body;
+
+    try {
+        const updatedPlaceDoc = await Place.findOneAndUpdate({ _id }, {
+            title,
+            city,
+            photos,
+            descripition,
+            extras,
+            perks,
+            price,
+            checkin,
+            checkout,
+            guests,
+        });
+
+        res.json(updatedPlaceDoc)
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json("deu erro ao atualizar a acomodacao", error);
+
+    }
+
+})
+
 router.post('/', async (req, res) => {
     connectDb();
     const {
@@ -94,7 +182,7 @@ router.post('/upload', uploadImage().array('files', 10), async (req, res) => {
 
         const idInterval = setInterval(() => {
             console.log('executou o intervalo')
-            
+
             if (files.length === fileURLArray.length) {
                 clearInterval(idInterval);
                 console.log('limpou o intervalo')

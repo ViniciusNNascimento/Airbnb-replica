@@ -1,11 +1,12 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Perks from './Perks';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import axios from "axios";
 import { useUserContext } from '../contexts/UserContext';
 import PhotoUploader from './PhotoUploader';
 
 const NewPlace = () => {
+    const { id } = useParams();
     const { user } = useUserContext();
     const [title, setTitle] = useState("");
     const [city, setCity] = useState("");
@@ -21,13 +22,40 @@ const NewPlace = () => {
     const [photoslink, setPhotosLink] = useState("");
 
 
+    useEffect(() => {
+
+        if (id) {
+            const axiosGet = async () => {
+                const { data } = await axios.get(`/places/${id}`);
+
+                console.log(data);
+
+                setTitle(data.title);
+                setCity(data.city);
+                setPhotos(data.photos);
+                setPerks(data.perks);
+                setDescripition(data.descripition);
+                setExtras(data.extras);
+                setPrice(data.price);
+                setCheckin(data.checkin);
+                setCheckout(data.checkout);
+                setGuests(data.guests);
+                setRedirect(data.redirect);
+                setPhotosLink(data.photoslink);
+
+            };
+            axiosGet();
+        }
+    }, []);
+
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (title &&
             city &&
-            // photos.length > 0 &&
+            photos.length > 0 &&
             descripition &&
             price &&
             checkin &&
@@ -35,21 +63,41 @@ const NewPlace = () => {
             guests
         ) {
             try {
-                const NewPlace = await axios.post('/places', {
-                    owner: user._id,
-                    title,
-                    city,
-                    // photos,
-                    descripition,
-                    extras,
-                    perks,
-                    price,
-                    checkin,
-                    checkout,
-                    guests,
-                });
 
-                console.log(NewPlace)
+                if (id) {
+                    const modifiedPlace = await axios.put(`/places/${id}`, {
+                        title,
+                        city,
+                        photos,
+                        descripition,
+                        extras,
+                        perks,
+                        price,
+                        checkin,
+                        checkout,
+                        guests,
+                    });
+
+                    console.log(modifiedPlace);
+
+                } else {
+
+                    const NewPlace = await axios.post('/places', {
+                        owner: user._id,
+                        title,
+                        city,
+                        photos,
+                        descripition,
+                        extras,
+                        perks,
+                        price,
+                        checkin,
+                        checkout,
+                        guests,
+                    });
+                    console.log(NewPlace)
+                }
+
 
                 setRedirect(true)
             } catch (error) {
@@ -67,7 +115,7 @@ const NewPlace = () => {
 
     };
 
-   
+
     if (redirect) return <Navigate to="/account/places" />;
 
 
@@ -100,7 +148,7 @@ const NewPlace = () => {
 
             </div>
 
-            <PhotoUploader {...{photoslink, setPhotosLink, setPhotos, photos}} />
+            <PhotoUploader {...{ photoslink, setPhotosLink, setPhotos, photos }} />
 
             <div className='flex flex-col gap-1'>
                 <label htmlFor='descripition' className='ml-2 text-2xl font-bold'>Descrição</label>

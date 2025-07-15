@@ -8,7 +8,7 @@ const Perks = ({perks, setPerks}) => {
         ? [...perks, target.value] 
         : [...perks].filter((perk) => perk !== target.value);
 
-        setPerks(newPerks)
+        setPerks(newPerks);
 
     };
 
@@ -20,7 +20,9 @@ const Perks = ({perks, setPerks}) => {
                     type="checkbox"
                     id='wifi'
                     value={"wifi"}
+                    checked={perks.includes("wifi")}
                     onChange={(e) => handleClick(e.target)}
+                    
 
                 />
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
@@ -36,6 +38,7 @@ const Perks = ({perks, setPerks}) => {
                     type="checkbox"
                     id='parking'
                     value={"parking"}
+                    checked={perks.includes("parking")}
                     onChange={(e) => handleClick(e.target)}
 
                 />
@@ -49,6 +52,7 @@ const Perks = ({perks, setPerks}) => {
                     type="checkbox"
                     id='tv'
                     value={"tv"}
+                    checked={perks.includes("tv")}
                     onChange={(e) => handleClick(e.target)}
 
                 />
@@ -63,6 +67,7 @@ const Perks = ({perks, setPerks}) => {
                     type="checkbox"
                     id='radio'
                     value={"radio"}
+                    checked={perks.includes("radio")}
                     onChange={(e) => handleClick(e.target)}
 
                 />
@@ -77,6 +82,7 @@ const Perks = ({perks, setPerks}) => {
                     type="checkbox"
                     id='pets'
                     value={"pets"}
+                    checked={perks.includes("pets")}
                     onChange={(e) => handleClick(e.target)}
 
                 />
@@ -90,6 +96,7 @@ const Perks = ({perks, setPerks}) => {
                     type="checkbox"
                     id='security'
                     value={"security"}
+                    checked={perks.includes("security")}
                     onChange={(e) => handleClick(e.target)}
 
                 />

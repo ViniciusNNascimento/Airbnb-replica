@@ -1,23 +1,19 @@
 import React from "react";
 
-const item = () => {
+const item = ({ place }) => {
   return (
     <a href="/" className="flex flex-col gap-2">
       <img
-        src="https://i0.wp.com/blog.bonitour.com.br/wp-content/uploads/2022/04/Destaque01-11-lugares-paradisiacos-no-Brasil-para-conhecer-_-1127x600-1.jpg?ssl=1"
+        src={place.photos[0]}
         alt="Imagem da acomodação"
         className="aspect-square rounded-2xl object-cover"
       />
       <div className="">
         <h3 className="text-xl font-semibold">
-          Fernando de Noronha, Pernanbuco
+          {place.city}
         </h3>
         <p className="truncate text-gray-600">
-          Fernando de Noronha/PE é um dos destinos brasileiros mais famosos por
-          suas belezas paradisíacas. Com praias de águas cristalinas e repletas
-          de vida marinha, aliás o destino encanta os turistas com passeios de
-          barco e atividades como trilhas e mergulho ao lado de tartarugas,
-          tubarões e golfinhos.
+          {place.descripition}
         </p>
       </div>
 
