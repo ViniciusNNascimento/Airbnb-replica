@@ -21,6 +21,7 @@
     "express": "^5.1.0",
     "fs": "^0.0.1-security",
     "image-downloader": "^4.3.0",
+    "jsonwebtoken": "^9.0.2",
     "mime-types": "^3.0.1",
     "mongoose": "^8.15.2",
     "url": "^0.11.4"
