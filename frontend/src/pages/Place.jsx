@@ -102,7 +102,7 @@ const Place = () => {
 
         <section>
             <div className="flex flex-col gap-4 sm:gap-6 mx-auto  max-w-7xl  sm:p-8 p-4">
-                <div className='flex flex-col sm:gap-1'>
+                <div className='flex flex-col sm:gap-4 gap-2'>
                     <div className='text-xl sm:text-3xl font-bold'>{place.title}</div>
 
 

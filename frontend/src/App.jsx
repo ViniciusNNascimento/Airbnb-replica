@@ -9,14 +9,17 @@ import Account from "./pages/Account";
 import Header from "./components/Header";
 import Place from "./pages/Place";
 
-axios.defaults.baseURL = import.meta.env.VITE_AXIOS_BASE_URL;
+axios.defaults.baseURL =
+  import.meta.env.MODE === "development"
+    ? "http://localhost:3000/api"
+    : "http://localhost:3000/api";
 axios.defaults.withCredentials = true;
 
 function App() {
   return (
     <UserContextProvider>
       <BrowserRouter>
-        <Header/>
+        <Header />
 
         <Routes>
           <Route path="/" element={<Home />} />

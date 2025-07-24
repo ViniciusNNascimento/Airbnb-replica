@@ -3,7 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import routes from "./routes/index.js"
 import { fileURLToPath } from "url";
-import { dirname } from "node:path";
+import path, { dirname } from "node:path";
 
 export const app = express();
 
@@ -19,5 +19,10 @@ app.use(cors({
 }));
 
 app.use("/tmp", express.static(__dirname + '/tmp'))
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
-app.use(routes);
+app.use("/api", routes);
+
+app.get('*path', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'))
+})
