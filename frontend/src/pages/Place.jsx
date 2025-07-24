@@ -1,8 +1,9 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router-dom';
 import { useUserContext } from '../contexts/UserContext';
 import Perk from '../components/Perk';
+import Booking from '../components/Booking';
 
 const Place = () => {
     const { id } = useParams();
@@ -12,6 +13,41 @@ const Place = () => {
     const [checkin, setCheckin] = useState("");
     const [checkout, setCheckout] = useState("");
     const [guests, setGuests] = useState("");
+    const [booking, setBooking] = useState(null);
+    const [redirect, setRedirect] = useState(false);
+
+
+    const numberOfDays = (date1, date2) => {
+        const date1GMT = date1 + "GMT-03:00";
+        const date2GMT = date2 + "GMT-03:00";
+
+        const dateCheckin = new Date(date1GMT);
+        const dateCheckout = new Date(date2GMT);
+
+        return (
+            (dateCheckout.getTime() - dateCheckin.getTime()) / (1000 * 60 * 60 * 24)
+        );
+    };
+
+    useEffect(() => {
+
+        if (place) {
+            const axiosGet = async () => {
+                const { data } = await axios.get("/bookings/owner");
+                setBooking(
+                    data.filter((booking) => {
+                        console.log(booking.place._id, place._id);
+
+                        return booking.place._id === place._id;
+                    })[0],
+                );
+
+            };
+
+            axiosGet();
+        }
+    }, [place]);
+
 
     useEffect(() => {
 
@@ -19,7 +55,6 @@ const Place = () => {
             const axiosGet = async () => {
                 const { data } = await axios.get(`/places/${id}`);
 
-                console.log(data);
                 setPlace(data)
             };
             axiosGet();
@@ -32,16 +67,33 @@ const Place = () => {
             : document.body.classList.remove('overflow-hidden')
     }, [overlay])
 
-    const handleBooking = (e) => {
+    const handleBooking = async (e) => {
         e.preventDefault();
 
         if (checkin && checkout && guests) {
+            const nights = numberOfDays(checkin, checkout)
 
-            console.log("fez uma reserva");
+            const objBooking = {
+                place: id,
+                user: user._id,
+                price: place.price,
+                total: place.price * nights,
+                checkin,
+                checkout,
+                guests,
+                nights,
+            };
+
+            const { data } = await axios.post("/bookings", objBooking);
+            
+            setRedirect(true)
+
         } else {
             alert("Preencha todas as informações antes de fazer uma reserva")
         }
     };
+
+    if (redirect) return <Navigate to='/account/bookings' />;
 
 
     if (!place) return <></>
@@ -62,6 +114,12 @@ const Place = () => {
                         <p>{place.city}</p>
                     </div>
 
+                    {/* booking */}
+
+                    {booking ? <Booking booking={booking} place={true} /> : ""}
+
+
+
                     <div className="relative grid sm:grid-cols-[2fr_1fr] aspect-square grid-rows- gap-4 sm:aspect-[3/2] rounded-2xl overflow-hidden ">
                         {place.photos
                             .filter((photo, index) => index < 3)
@@ -71,7 +129,7 @@ const Place = () => {
                                     src={photo}
                                     alt="imagem da acomodacao"
                                     onClick={() => setOverlay(true)}
-                                    key={index} />
+                                    key={photo} />
                             ))};
                         <div
                             className='absolute right-2 bottom-2 gap-2 flex  bg-white border border-black rounded-xl px-2 py-1 transition hover:scale-105 cursor-pointer'
@@ -88,8 +146,8 @@ const Place = () => {
 
                     </div>
 
-                    <div className='grid grid-cols-1 md:grid-cols-2 p-4'>
-
+                    {/* colunas */}
+                    <div className={`grid ${booking ? "" : 'grid-cols-1 md:grid-cols-2 p-4'} `}>
                         <div className='order-2 md:order-none p-6 flex flex-col gap-5'>
                             <div className='flex flex-col gap-2'>
                                 <p className='sm:text-2xl text-lg font-bold'>Descrição</p>
@@ -111,7 +169,7 @@ const Place = () => {
 
                             <div className='flex flex-col gap-1'>
                                 {place.perks.map((perk) => (
-                                    <div className='flex gap-2 items-center'>
+                                    <div key={perk} className='flex gap-2 items-center'>
                                         <Perk perk={perk}></Perk>
 
                                     </div>
@@ -120,64 +178,69 @@ const Place = () => {
 
                         </div>
 
-                        <form className='order-1 md:order-none justify-self-center border self-center border-gray-300 rounded-2xl px-4 py-3 sm:px-8 sm:py-4 flex flex-col gap-4'>
-                            <p className='sm:text-2xl text-lg font-bold text-center'>Preço: R$ {place.price} por noite</p>
+
+                        {booking ? "" :
+                            <form className='order-1 md:order-none justify-self-center border self-center  border-gray-300 rounded-2xl px-4 py-3 sm:px-8 sm:py-4  flex flex-col gap-4'>
+                                <p className='sm:text-2xl text-lg font-bold text-center'>Preço: R$ {place.price} por noite</p>
 
 
-                            <div className='flex flex-col sm:flex-row '>
-                                <div className='rounded-tl-2xl rounded-tr-2xl border border-gray-300 px-4 py-2 sm:rounded-tr-none sm:rounded-bl-2xl'>
-                                    <p className='font-bold'>Checkin</p>
-                                    <input
-                                        className='w-full sm:w-auto'
-                                        type="date"
-                                        value={checkin}
-                                        onChange={(e) => setCheckin(e.target.value)} />
+                                <div className='flex flex-col sm:flex-row '>
+                                    <div className='rounded-tl-2xl rounded-tr-2xl border border-gray-300 px-4 py-2 sm:rounded-tr-none sm:rounded-bl-2xl'>
+                                        <p className='font-bold'>Checkin</p>
+                                        <input
+                                            className='w-full sm:w-auto'
+                                            type="date"
+                                            value={checkin}
+                                            onChange={(e) => setCheckin(e.target.value)} />
+                                    </div>
+                                    <div className='rounded-br-2xl rounded-bl-2xl border border-t-0 sm:border-l-0 border-gray-300 px-4 py-2 sm:rounded-tr-2xl sm:rounded-bl-none sm:border'>
+                                        <p className='font-bold'>Checkout</p>
+                                        <input
+                                            className='w-full sm:w-auto'
+                                            type="date"
+                                            value={checkout}
+                                            onChange={(e) => setCheckout(e.target.value)} />
+                                    </div>
                                 </div>
-                                <div className='rounded-br-2xl rounded-bl-2xl border border-t-0 sm:border-l-0 border-gray-300 px-4 py-2 sm:rounded-tr-2xl sm:rounded-bl-none sm:border'>
-                                    <p className='font-bold'>Checkout</p>
+
+
+                                <div className='border border-gray-300 rounded-2xl  px-4 py-2 flex flex-col gap-2'>
+                                    <p className='font-bold'>N de convidados</p>
                                     <input
-                                        className='w-full sm:w-auto'
-                                        type="date"
-                                        value={checkout}
-                                        onChange={(e) => setCheckout(e.target.value)} />
+                                        type="number"
+                                        placeholder='2'
+                                        value={guests}
+                                        onChange={(e) => setGuests(e.target.value)} />
                                 </div>
-                            </div>
+
+                                {user ? (
+                                    <button
+                                        className="bg-primary-400 w-full cursor-pointer rounded-full border border-gray-300 px-4 py-2 font-bold text-center text-white"
+
+                                        onClick={handleBooking}
+                                    >
+                                        Reservar
+                                    </button>) : (
+                                    <Link
+                                        to="/login"
+                                        className="bg-primary-400 w-full cursor-pointer rounded-full border border-gray-300 px-4 py-2 font-bold text-white text-center"
+
+                                    >
+                                        Faça seu login
+                                    </Link>)}
+
+                            </form>}
 
 
-                            <div className='border border-gray-300 rounded-2xl  px-4 py-2 flex flex-col gap-2'>
-                                <p className='font-bold'>N de convidados</p>
-                                <input
-                                    type="number"
-                                    placeholder='2'
-                                    value={guests}
-                                    onChange={(e) => setGuests(e.target.value)} />
-                            </div>
-
-                            {user ? (
-                                <button
-                                    className="bg-primary-400 w-full cursor-pointer rounded-full border border-gray-300 px-4 py-2 font-bold text-center text-white"
-
-                                    onClick={handleBooking}
-                                >
-                                    Reservar
-                                </button>) : (
-                                <Link
-                                    to="/login"
-                                    className="bg-primary-400 w-full cursor-pointer rounded-full border border-gray-300 px-4 py-2 font-bold text-white text-center"
-
-                                >
-                                    Faça seu login
-                                </Link>)}
-
-                        </form>
                     </div>
 
+                    {/* extras */}
                     <div className='rounded-2xl bg-gray-200 p-6 flex flex-col gap-2'>
                         <p className='sm:text-2xl text-lg font-bold'>Informações Extras</p>
                         <p>{place.extras}</p>
                     </div>
 
-
+                    {/* overlay */}
                     <div className={`${overlay ? "flex" : "hidden"} bg-black inset-0 fixed overflow-y-auto text-white items-start`}>
                         <div className="flex flex-col gap-8 mx-auto  max-w-7xl  p-8">
                             <div className="grid sm:grid-cols-2 gap-4 ">
