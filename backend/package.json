@@ -24,6 +24,7 @@
     "jsonwebtoken": "^9.0.2",
     "mime-types": "^3.0.1",
     "mongoose": "^8.15.2",
+    "multer": "^2.0.2",
     "url": "^0.11.4"
   }
 }
