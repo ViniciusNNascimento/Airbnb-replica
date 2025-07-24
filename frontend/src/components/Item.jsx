@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const item = ({ place }) => {
+const Item = ({ place }) => {
   return (
     <Link to={`/place/${place._id}`} className="flex flex-col gap-2">
       <img
@@ -25,4 +25,4 @@ const item = ({ place }) => {
   );
 };
 
-export default item;
+export default Item;
